@@ -66,7 +66,8 @@ state_machine_result_t dispatch_event(state_machine_t* const pState_Machine[]
   state_machine_result_t result;
 
   // Iterate through all state machines in the array to check if event is pending to dispatch.
-  for(uint32_t index = 0; index < quantity;)
+  uint32_t index = 0;
+  for(index = 0; index < quantity;)
   {
     if(pState_Machine[index]->Event == 0)
     {
