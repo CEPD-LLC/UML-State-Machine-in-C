@@ -47,6 +47,7 @@ typedef enum
   EVENT_UN_HANDLED,    //!< Event could not be handled.
   //!< Handler handled the Event successfully and posted new event to itself.
   TRIGGERED_TO_SELF,
+  RUN_AGAIN,
 }state_machine_result_t;
 
 /*
@@ -61,7 +62,8 @@ typedef struct finite_state state_t;
 
 typedef struct state_machine_t state_machine_t;
 typedef state_machine_result_t (*state_handler) (state_machine_t* const State);
-typedef void (*state_machine_event_logger)(uint32_t state_machine, uint32_t state, uint32_t event);
+typedef void (*state_machine_event_logger)(uint32_t state_machine, uint32_t state,
+                uint32_t prevState, uint32_t event, uint32_t prevEvent);
 typedef void (*state_machine_result_logger)(uint32_t state, state_machine_result_t result);
 
 //! finite state structure
@@ -95,7 +97,9 @@ struct hierarchical_state
 struct state_machine_t
 {
    uint32_t Event;          //!< Pending Event for state machine
+   uint32_t PrevEvent;
    const state_t* State;    //!< State of state machine.
+   const state_t* PrevState;
 };
 
 /*
@@ -121,6 +125,8 @@ extern state_machine_result_t traverse_state(state_machine_t* const pState_Machi
 
 extern state_machine_result_t switch_state(state_machine_t* const pState_Machine,
                                                     const state_t* const pTarget_State);
+
+extern switch_event(state_machine_t* const pState_Machine, uint32_t event);
 
 #ifdef __cplusplus
 }

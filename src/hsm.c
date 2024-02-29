@@ -78,14 +78,25 @@ state_machine_result_t dispatch_event(state_machine_t* const pState_Machine[]
     const state_t* pState = pState_Machine[index]->State;
     do
     {
-#if STATE_MACHINE_LOGGER
-      event_logger(index, pState->Id, pState_Machine[index]->Event);
-#endif // STATE_MACHINE_LOGGER
+       uint32_t currentEvent = pState_Machine[index]->Event;
+       uint32_t prevEvent = pState_Machine[index]->PrevEvent;
+
         // Call the state handler.
       result = pState->Handler(pState_Machine[index]);
+      uint32_t currentStateID = pState_Machine[index]->State->Id;
+      uint32_t prevStateID = pState_Machine[index]->PrevState->Id;
+
 #if STATE_MACHINE_LOGGER
-      result_logger(pState_Machine[index]->State->Id, result);
+      if(currentEvent != prevEvent)
+          event_logger(index, currentStateID, prevStateID, currentEvent, prevEvent);
 #endif // STATE_MACHINE_LOGGER
+#if STATE_MACHINE_LOGGER
+      if(currentStateID != prevStateID)
+          result_logger(pState_Machine[index]->State->Id, result);
+#endif // STATE_MACHINE_LOGGER
+
+      pState_Machine[index]->PrevEvent = pState_Machine[index]->Event;
+      pState_Machine[index]->PrevState = pState_Machine[index]->State;
 
       switch(result)
       {
@@ -101,6 +112,9 @@ state_machine_result_t dispatch_event(state_machine_t* const pState_Machine[]
 
         index = 0;  // Restart the event dispatcher from the first state machine.
         break;
+
+      case RUN_AGAIN:
+          return result;
 
     #if HIERARCHICAL_STATES
     // State handler could not handled the event.
@@ -144,6 +158,8 @@ extern state_machine_result_t switch_state(state_machine_t* const pState_Machine
                                            const state_t* const pTarget_State)
 {
   const state_t* const pSource_State = pState_Machine->State;
+  pState_Machine->PrevState = pSource_State;
+
   bool triggered_to_self = false;
   pState_Machine->State = pTarget_State;    // Save the target node
 
@@ -158,6 +174,12 @@ extern state_machine_result_t switch_state(state_machine_t* const pState_Machine
   }
 
   return EVENT_HANDLED;
+}
+
+extern switch_event(state_machine_t* const pState_Machine, uint32_t event)
+{
+    pState_Machine->PrevEvent = pState_Machine->Event;
+    pState_Machine->Event = event;
 }
 
 #if HIERARCHICAL_STATES
