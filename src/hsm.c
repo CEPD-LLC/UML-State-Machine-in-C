@@ -78,16 +78,17 @@ state_machine_result_t dispatch_event(state_machine_t* const pState_Machine[]
     const state_t* pState = pState_Machine[index]->State;
     do
     {
-       uint32_t currentEvent = pState_Machine[index]->Event;
-       uint32_t prevEvent = pState_Machine[index]->PrevEvent;
+      //uint32_t startEvent = pState_Machine[index]->Event;
 
         // Call the state handler.
       result = pState->Handler(pState_Machine[index]);
+      uint32_t currentEvent = pState_Machine[index]->Event;
+      uint32_t prevEvent = pState_Machine[index]->PrevEvent;
       uint32_t currentStateID = pState_Machine[index]->State->Id;
       uint32_t prevStateID = pState_Machine[index]->PrevState->Id;
 
 #if STATE_MACHINE_LOGGER
-      if(currentEvent != prevEvent)
+      if(currentEvent != prevEvent)  //|| currentEvent != startEvent)
           event_logger(index, currentStateID, prevStateID, currentEvent, prevEvent);
 #endif // STATE_MACHINE_LOGGER
 #if STATE_MACHINE_LOGGER
