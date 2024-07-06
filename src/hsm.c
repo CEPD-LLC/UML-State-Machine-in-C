@@ -84,7 +84,9 @@ state_machine_result_t dispatch_event(state_machine_t* const pState_Machine[]
         // Call the state handler.
       result = pState->Handler(pState_Machine[index]);
       uint32_t currentStateID = pState_Machine[index]->State->Id;
-      uint32_t prevStateID = pState_Machine[index]->PrevState->Id;
+      uint32_t prevStateID = 0;
+      if(pState_Machine[index]->PrevState != NULL)
+        prevStateID = pState_Machine[index]->PrevState->Id;
 
 #if STATE_MACHINE_LOGGER
       if(currentEvent != prevEvent)
